@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>업그레이드 D-Day</title>
+    <title>D-Day 앱 (보기/편집 모드)</title>
     <style>
         /* CSS: 앱 디자인 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
@@ -13,18 +13,19 @@
             background-color: #f0f2f5;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* 상단 정렬 */
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding-top: 40px;
+            padding: 40px 15px;
+            box-sizing: border-box;
         }
 
         .container {
             background-color: white;
             padding: 20px 30px;
             border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            width: 90%;
+            box-shadow: 0 6px T20px rgba(0, 0, 0, 0.08);
+            width: 100%;
             max-width: 500px;
             text-align: center;
         }
@@ -34,23 +35,48 @@
             margin-bottom: 20px;
         }
 
-        .input-box {
+        /* 편집/완료 버튼 */
+        .edit-controls {
+            margin-bottom: 20px;
+        }
+
+        #toggle-edit-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 1px solid #007bff;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        /* 편집 모드일 때 버튼 스타일 변경 */
+        .container.edit-mode #toggle-edit-button {
+            background-color: #f8f9fa;
+            color: #007bff;
+        }
+
+        /* 편집 패널 (입력, 정렬) */
+        #edit-panel {
             display: flex;
             flex-direction: column;
             gap: 12px;
             margin-bottom: 20px;
         }
 
-        .input-box input {
+        #edit-panel input {
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
         }
 
-        .input-box button {
+        #add-button {
             padding: 12px;
-            background: linear-gradient(45deg, #007bff, #0056b3);
+            background: linear-gradient(45deg, #28a745, #218838);
             color: white;
             border: none;
             border-radius: 8px;
@@ -59,13 +85,8 @@
             font-size: 16px;
             transition: transform 0.2s;
         }
-
-        .input-box button:hover {
+        #add-button:hover {
             transform: scale(1.02);
-        }
-        
-        .sort-box {
-            margin-bottom: 20px;
         }
         
         #sort-button {
@@ -76,10 +97,8 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        #sort-button:hover {
-            background-color: #5a6268;
-        }
 
+        /* D-Day 목록 */
         #dday-list {
             list-style: none;
             padding: 0;
@@ -97,32 +116,17 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
-        .dday-info {
-            flex-grow: 1;
-        }
+        .dday-info { flex-grow: 1; }
+        .dday-title { font-weight: bold; font-size: 1.1em; color: #343a40; }
+        .dday-date { font-size: 0.8em; color: #6c757d; }
+        .dday-countdown { font-size: 0.9em; color: #495057; }
+        .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; display: block; }
 
-        .dday-title {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #343a40;
-        }
-        
-        .dday-date {
-            font-size: 0.8em;
-            color: #6c757d;
-        }
-
-        .dday-countdown {
-            font-size: 0.9em;
-            color: #495057;
-        }
-
-        .dday-result {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #dc3545;
-            margin-top: 5px;
-            display: block;
+        /* D+ 상세 정보 스타일 */
+        .dday-elapsed {
+            font-size: 0.85em;
+            color: #17a2b8;
+            margin-top: 4px;
         }
         
         .delete-button {
@@ -134,69 +138,67 @@
             cursor: pointer;
             padding: 5px 10px;
         }
-        .delete-button:hover {
-            opacity: 0.7;
+
+        /* 유틸리티 클래스 */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="app-container">
         <h1>D-Day 카운터</h1>
-        <div class="input-box">
+
+        <div class="edit-controls">
+            <button id="toggle-edit-button">편집</button>
+        </div>
+
+        <!-- 편집 모드에서만 보이는 패널 -->
+        <div id="edit-panel" class="hidden">
             <input type="text" id="event-title" placeholder="이벤트 이름을 입력하세요">
             <input type="date" id="event-date">
             <button id="add-button">추가하기</button>
-        </div>
-        
-        <div class="sort-box">
             <button id="sort-button">마감일 임박 순으로 정렬</button>
         </div>
-
+        
         <ul id="dday-list">
             <!-- D-Day 목록이 여기에 동적으로 추가됩니다 -->
         </ul>
     </div>
 
     <script>
-        // JavaScript: 앱의 모든 기능 구현
-
-        // 1. DOM 요소 가져오기
+        // === DOM 요소 가져오기 ===
+        const container = document.getElementById('app-container');
+        const toggleEditButton = document.getElementById('toggle-edit-button');
+        const editPanel = document.getElementById('edit-panel');
         const titleInput = document.getElementById('event-title');
         const dateInput = document.getElementById('event-date');
         const addButton = document.getElementById('add-button');
         const sortButton = document.getElementById('sort-button');
         const ddayList = document.getElementById('dday-list');
 
-        // 2. D-Day 데이터를 저장할 배열
-        // 로컬 스토리지에서 데이터를 불러오거나, 없으면 빈 배열로 시작
+        // === 상태 관리 ===
         let ddays = JSON.parse(localStorage.getItem('ddays')) || [];
+        let isEditMode = false; // 현재 모드 (false: 보기, true: 편집)
+        let countdownInterval;
 
-        // 3. 핵심 함수들
-        
-        /**
-         * 현재 D-Day 배열을 로컬 스토리지에 저장하는 함수
-         */
+        // === 핵심 함수 ===
+
         const saveDdays = () => {
             localStorage.setItem('ddays', JSON.stringify(ddays));
         };
 
-        /**
-         * D-Day 목록을 화면에 렌더링하는 함수
-         */
         const renderDdays = () => {
-            // 목록을 비우고 다시 그림
             ddayList.innerHTML = '';
 
-            // ddays 배열의 각 항목에 대해 li 요소 생성
             ddays.forEach(dday => {
                 const li = document.createElement('li');
                 li.classList.add('dday-item');
 
-                // 남은 시간 계산
                 const targetDate = new Date(dday.date);
                 const now = new Date();
-                const diff = targetDate - now; // 밀리초 단위 차이
+                const diff = targetDate - now;
 
                 const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const diffHours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -204,117 +206,102 @@
                 const diffSeconds = Math.floor((diff / 1000) % 60);
 
                 let resultText = '';
-                let countdownText = '';
+                let countdownHTML = '';
 
                 if (diff < 0) {
                     // D-Day가 지난 경우
-                    resultText = `D+${Math.abs(diffDays) + 1}`;
-                    countdownText = '종료된 이벤트입니다.';
+                    const totalDaysPassed = Math.abs(diffDays);
+                    resultText = `D+${totalDaysPassed}`;
+
+                    // 년/월/일 계산
+                    let years = now.getFullYear() - targetDate.getFullYear();
+                    let months = now.getMonth() - targetDate.getMonth();
+                    let days = now.getDate() - targetDate.getDate();
+
+                    if (days < 0) {
+                        months--;
+                        days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+                    }
+                    if (months < 0) {
+                        years--;
+                        months += 12;
+                    }
+                    
+                    countdownHTML = `<div class="dday-elapsed">${years}년 ${months}개월 ${days}일 지남</div>`;
+
                 } else {
                     // D-Day가 남은 경우
                     resultText = `D-${diffDays}`;
-                    countdownText = `${String(diffHours).padStart(2, '0')}시간 ${String(diffMinutes).padStart(2, '0')}분 ${String(diffSeconds).padStart(2, '0')}초 남음`;
+                    if (diffDays === 0) resultText = 'D-Day!';
+                    countdownHTML = `<div class="dday-countdown">${String(diffHours).padStart(2, '0')}시간 ${String(diffMinutes).padStart(2, '0')}분 ${String(diffSeconds).padStart(2, '0')}초 남음</div>`;
                 }
                 
-                if (diffDays === 0 && diff > 0) {
-                    resultText = 'D-Day!';
-                }
-
+                // 편집 모드일 때만 삭제 버튼을 보여줌
+                const deleteButtonHTML = isEditMode ? `<button class="delete-button" data-id="${dday.id}">×</button>` : '';
 
                 li.innerHTML = `
                     <div class="dday-info">
                         <div class="dday-title">${dday.title}</div>
                         <div class="dday-date">${dday.date}</div>
-                        <div class="dday-countdown">${countdownText}</div>
+                        ${countdownHTML}
                         <div class="dday-result">${resultText}</div>
                     </div>
-                    <button class="delete-button" data-id="${dday.id}">×</button>
+                    ${deleteButtonHTML}
                 `;
-
                 ddayList.appendChild(li);
             });
         };
-        
-        /**
-         * D-Day 항목을 추가하는 함수
-         */
-        const addDday = () => {
-            const title = titleInput.value;
-            const date = dateInput.value;
 
-            if (!title || !date) {
+        const toggleEditMode = () => {
+            isEditMode = !isEditMode; // 모드 전환
+            
+            // 클래스와 버튼 텍스트 변경으로 UI 업데이트
+            container.classList.toggle('edit-mode', isEditMode);
+            editPanel.classList.toggle('hidden', !isEditMode);
+            toggleEditButton.textContent = isEditMode ? '완료' : '편집';
+
+            // 모드가 바뀔 때마다 목록을 다시 그려서 삭제 버튼 등을 업데이트
+            renderDdays();
+        };
+        
+        const addDday = () => {
+            if (!titleInput.value || !dateInput.value) {
                 alert('이벤트 이름과 날짜를 모두 입력해주세요.');
                 return;
             }
-
-            // 새로운 D-Day 객체 생성
-            const newDday = {
-                id: Date.now(), // 고유 ID로 현재 시간을 사용
-                title: title,
-                date: date,
-            };
-
-            // 배열에 추가
+            const newDday = { id: Date.now(), title: titleInput.value, date: dateInput.value };
             ddays.push(newDday);
-
-            // 저장 및 화면 다시 그리기
             saveDdays();
             renderDdays();
-
-            // 입력 필드 초기화
             titleInput.value = '';
             dateInput.value = '';
         };
 
-        /**
-         * D-Day 항목을 삭제하는 함수
-         * @param {number} id - 삭제할 D-Day의 고유 ID
-         */
         const deleteDday = (id) => {
-            // filter를 사용해 해당 id를 가진 항목을 제외한 새 배열을 만듦
             ddays = ddays.filter(dday => dday.id !== id);
-            
-            // 저장 및 화면 다시 그리기
             saveDdays();
             renderDdays();
         };
-
-        // 4. 이벤트 리스너 설정
-
-        // '추가하기' 버튼 클릭 이벤트
-        addButton.addEventListener('click', addDday);
         
-        // 엔터 키로 추가하기
-        titleInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addDday();
-            }
-        });
-
-        // '삭제' 버튼 클릭 이벤트 (이벤트 위임 사용)
-        ddayList.addEventListener('click', (e) => {
-            // 클릭된 요소가 삭제 버튼인지 확인
-            if (e.target.classList.contains('delete-button')) {
-                // data-id 속성에서 id 값을 가져옴 (숫자로 변환)
-                const idToDelete = Number(e.target.dataset.id);
-                deleteDday(idToDelete);
-            }
-        });
-        
-        // '정렬' 버튼 클릭 이벤트
-        sortButton.addEventListener('click', () => {
+        const sortDdays = () => {
             ddays.sort((a, b) => new Date(a.date) - new Date(b.date));
             renderDdays();
+        };
+
+        // === 이벤트 리스너 설정 ===
+        toggleEditButton.addEventListener('click', toggleEditMode);
+        addButton.addEventListener('click', addDday);
+        sortButton.addEventListener('click', sortDdays);
+        
+        ddayList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-button')) {
+                deleteDday(Number(e.target.dataset.id));
+            }
         });
 
-
-        // 5. 앱 초기화
-        
-        // 1초마다 화면을 다시 그려서 실시간 카운트다운 효과를 줌
-        setInterval(renderDdays, 1000);
-
-        // 페이지가 처음 로드될 때 저장된 D-Day 목록을 화면에 표시
-        renderDdays();
+        // === 앱 초기화 ===
+        countdownInterval = setInterval(renderDdays, 1000);
+        renderDdays(); // 페이지 첫 로드 시 목록 표시
 
     </script>
 </body>
