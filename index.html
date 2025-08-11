@@ -1,308 +1,261 @@
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱 (보기/편집 모드)</title>
+    <title>D-Day 앱 (Firebase 로그인)</title>
     <style>
-        /* CSS: 앱 디자인 */
+        /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            margin: 0;
-            padding: 40px 15px;
-            box-sizing: border-box;
-        }
-
-        .container {
-            background-color: white;
-            padding: 20px 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px T20px rgba(0, 0, 0, 0.08);
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-
-        /* 편집/완료 버튼 */
-        .edit-controls {
-            margin-bottom: 20px;
-        }
-
-        #toggle-edit-button {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 8px;
-            border: 1px solid #007bff;
-            background-color: #007bff;
-            color: white;
-            transition: background-color 0.2s, color 0.2s;
-        }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 40px 15px; box-sizing: border-box; }
+        .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; text-align: center; }
+        h1, h2 { color: #2c3e50; }
+        .hidden { display: none !important; }
         
-        /* 편집 모드일 때 버튼 스타일 변경 */
-        .container.edit-mode #toggle-edit-button {
-            background-color: #f8f9fa;
-            color: #007bff;
-        }
+        /* 로그인/회원가입 폼 */
+        .auth-form { display: flex; flex-direction: column; gap: 15px; }
+        .auth-form input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .auth-form button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; color: white; }
+        #login-button { background-color: #007bff; }
+        #signup-button { background-color: #28a745; }
+        #error-message { color: red; font-size: 0.9em; min-height: 1.2em; }
 
-        /* 편집 패널 (입력, 정렬) */
-        #edit-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        #edit-panel input {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        #add-button {
-            padding: 12px;
-            background: linear-gradient(45deg, #28a745, #218838);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: transform 0.2s;
-        }
-        #add-button:hover {
-            transform: scale(1.02);
-        }
+        /* 메인 앱 섹션 */
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .user-info { font-size: 0.9em; color: #6c757d; }
+        #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
         
-        #sort-button {
-            padding: 8px 16px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        /* D-Day 목록 */
-        #dday-list {
-            list-style: none;
-            padding: 0;
-            text-align: left;
-        }
-
-        .dday-item {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
+        /* D-Day 목록 (이전과 유사) */
+        #dday-list { list-style: none; padding: 0; text-align: left; }
+        .dday-item { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .dday-info { flex-grow: 1; }
-        .dday-title { font-weight: bold; font-size: 1.1em; color: #343a40; }
-        .dday-date { font-size: 0.8em; color: #6c757d; }
-        .dday-countdown { font-size: 0.9em; color: #495057; }
-        .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; display: block; }
-
-        /* D+ 상세 정보 스타일 */
-        .dday-elapsed {
-            font-size: 0.85em;
-            color: #17a2b8;
-            margin-top: 4px;
-        }
-        
-        .delete-button {
-            background-color: transparent;
-            color: #dc3545;
-            border: none;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 5px 10px;
-        }
-
-        /* 유틸리티 클래스 */
-        .hidden {
-            display: none !important;
-        }
+        .dday-title { font-weight: bold; font-size: 1.1em; }
+        .delete-button { background: none; border: none; color: #dc3545; font-size: 1.2em; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="container" id="app-container">
-        <h1>D-Day 카운터</h1>
-
-        <div class="edit-controls">
-            <button id="toggle-edit-button">편집</button>
+    <div class="container">
+        <!-- 로그인 전 표시될 화면 -->
+        <div id="auth-section">
+            <h2>로그인 / 회원가입</h2>
+            <div class="auth-form">
+                <input type="email" id="email-input" placeholder="이메일">
+                <input type="password" id="password-input" placeholder="비밀번호 (6자리 이상)">
+                <p id="error-message"></p>
+                <button id="login-button">로그인</button>
+                <button id="signup-button">회원가입</button>
+            </div>
         </div>
 
-        <!-- 편집 모드에서만 보이는 패널 -->
-        <div id="edit-panel" class="hidden">
-            <input type="text" id="event-title" placeholder="이벤트 이름을 입력하세요">
-            <input type="date" id="event-date">
-            <button id="add-button">추가하기</button>
-            <button id="sort-button">마감일 임박 순으로 정렬</button>
+        <!-- 로그인 후 표시될 화면 -->
+        <div id="app-section" class="hidden">
+            <div class="app-header">
+                <span class="user-info" id="user-email"></span>
+                <button id="logout-button">로그아웃</button>
+            </div>
+            <h1>D-Day 목록</h1>
+            <div class="input-box" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <input type="text" id="event-title" placeholder="이벤트 이름">
+                <input type="date" id="event-date">
+                <button id="add-button" style="padding: 12px; background-color: #007bff; color: white; border:none; border-radius: 8px; cursor:pointer;">추가하기</button>
+            </div>
+            <ul id="dday-list"></ul>
         </div>
-        
-        <ul id="dday-list">
-            <!-- D-Day 목록이 여기에 동적으로 추가됩니다 -->
-        </ul>
     </div>
 
-    <script>
-        // === DOM 요소 가져오기 ===
-        const container = document.getElementById('app-container');
-        const toggleEditButton = document.getElementById('toggle-edit-button');
-        const editPanel = document.getElementById('edit-panel');
+    <!-- Firebase SDK 로드 -->
+    <script type="module">
+        // Firebase 9버전 이상에서는 이런식으로 모듈을 가져옵니다.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+        // =======================================================================
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 1단계: 여기에 Firebase 설정 객체 붙여넣기 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        // =======================================================================
+    /////<script type="module">
+          // Import the functions you need from the SDKs you need
+          /////import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+          /////import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+          // TODO: Add SDKs for Firebase products that you want to use
+          // https://firebase.google.com/docs/web/setup#available-libraries
+        
+          // Your web app's Firebase configuration
+          // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+          const firebaseConfig = {
+            apiKey: "AIzaSyBq6wADijXkVUOqw44Pv5BKN0xJ9BtS11Q",
+            authDomain: "d-day-app.firebaseapp.com",
+            projectId: "d-day-app",
+            storageBucket: "d-day-app.firebasestorage.app",
+            messagingSenderId: "39953405485",
+            appId: "1:39953405485:web:3e655af75dcde652ce8aa4",
+            measurementId: "G-2YY6MSFZZJ"
+          };
+        
+          // Initialize Firebase
+          const app = initializeApp(firebaseConfig);
+          const analytics = getAnalytics(app);
+        </script>
+        
+
+        
+     
+        // =======================================================================
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // =======================================================================
+
+        // Firebase 앱 초기화
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM 요소 가져오기
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const loginButton = document.getElementById('login-button');
+        const signupButton = document.getElementById('signup-button');
+        const logoutButton = document.getElementById('logout-button');
+        const userEmailSpan = document.getElementById('user-email');
+        const errorMessage = document.getElementById('error-message');
         const titleInput = document.getElementById('event-title');
         const dateInput = document.getElementById('event-date');
         const addButton = document.getElementById('add-button');
-        const sortButton = document.getElementById('sort-button');
         const ddayList = document.getElementById('dday-list');
-
-        // === 상태 관리 ===
-        let ddays = JSON.parse(localStorage.getItem('ddays')) || [];
-        let isEditMode = false; // 현재 모드 (false: 보기, true: 편집)
-        let countdownInterval;
-
-        // === 핵심 함수 ===
-
-        const saveDdays = () => {
-            localStorage.setItem('ddays', JSON.stringify(ddays));
-        };
-
-        const renderDdays = () => {
-            ddayList.innerHTML = '';
-
-            ddays.forEach(dday => {
-                const li = document.createElement('li');
-                li.classList.add('dday-item');
-
-                const targetDate = new Date(dday.date);
-                const now = new Date();
-                const diff = targetDate - now;
-
-                const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const diffHours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const diffMinutes = Math.floor((diff / (1000 * 60)) % 60);
-                const diffSeconds = Math.floor((diff / 1000) % 60);
-
-                let resultText = '';
-                let countdownHTML = '';
-
-                if (diff < 0) {
-                    // D-Day가 지난 경우
-                    const totalDaysPassed = Math.abs(diffDays);
-                    resultText = `D+${totalDaysPassed}`;
-
-                    // 년/월/일 계산
-                    let years = now.getFullYear() - targetDate.getFullYear();
-                    let months = now.getMonth() - targetDate.getMonth();
-                    let days = now.getDate() - targetDate.getDate();
-
-                    if (days < 0) {
-                        months--;
-                        days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-                    }
-                    if (months < 0) {
-                        years--;
-                        months += 12;
-                    }
-                    
-                    countdownHTML = `<div class="dday-elapsed">${years}년 ${months}개월 ${days}일 지남</div>`;
-
-                } else {
-                    // D-Day가 남은 경우
-                    resultText = `D-${diffDays}`;
-                    if (diffDays === 0) resultText = 'D-Day!';
-                    countdownHTML = `<div class="dday-countdown">${String(diffHours).padStart(2, '0')}시간 ${String(diffMinutes).padStart(2, '0')}분 ${String(diffSeconds).padStart(2, '0')}초 남음</div>`;
-                }
-                
-                // 편집 모드일 때만 삭제 버튼을 보여줌
-                const deleteButtonHTML = isEditMode ? `<button class="delete-button" data-id="${dday.id}">×</button>` : '';
-
-                li.innerHTML = `
-                    <div class="dday-info">
-                        <div class="dday-title">${dday.title}</div>
-                        <div class="dday-date">${dday.date}</div>
-                        ${countdownHTML}
-                        <div class="dday-result">${resultText}</div>
-                    </div>
-                    ${deleteButtonHTML}
-                `;
-                ddayList.appendChild(li);
-            });
-        };
-
-        const toggleEditMode = () => {
-            isEditMode = !isEditMode; // 모드 전환
-            
-            // 클래스와 버튼 텍스트 변경으로 UI 업데이트
-            container.classList.toggle('edit-mode', isEditMode);
-            editPanel.classList.toggle('hidden', !isEditMode);
-            toggleEditButton.textContent = isEditMode ? '완료' : '편집';
-
-            // 모드가 바뀔 때마다 목록을 다시 그려서 삭제 버튼 등을 업데이트
-            renderDdays();
-        };
         
-        const addDday = () => {
-            if (!titleInput.value || !dateInput.value) {
-                alert('이벤트 이름과 날짜를 모두 입력해주세요.');
-                return;
-            }
-            const newDday = { id: Date.now(), title: titleInput.value, date: dateInput.value };
-            ddays.push(newDday);
-            saveDdays();
-            renderDdays();
-            titleInput.value = '';
-            dateInput.value = '';
-        };
+        let currentDdays = []; // 실시간 데이터를 담을 배열
+        let unsubscribeFromDdays = null; // 실시간 리스너 구독 해제 함수
 
-        const deleteDday = (id) => {
-            ddays = ddays.filter(dday => dday.id !== id);
-            saveDdays();
-            renderDdays();
-        };
-        
-        const sortDdays = () => {
-            ddays.sort((a, b) => new Date(a.date) - new Date(b.date));
-            renderDdays();
-        };
+        // --- 인증 관련 함수 ---
 
-        // === 이벤트 리스너 설정 ===
-        toggleEditButton.addEventListener('click', toggleEditMode);
-        addButton.addEventListener('click', addDday);
-        sortButton.addEventListener('click', sortDdays);
-        
-        ddayList.addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-button')) {
-                deleteDday(Number(e.target.dataset.id));
+        signupButton.addEventListener('click', async () => {
+            try {
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                await createUserWithEmailAndPassword(auth, email, password);
+                errorMessage.textContent = '';
+            } catch (error) {
+                errorMessage.textContent = "회원가입 실패: " + error.message;
             }
         });
 
-        // === 앱 초기화 ===
-        countdownInterval = setInterval(renderDdays, 1000);
-        renderDdays(); // 페이지 첫 로드 시 목록 표시
+        loginButton.addEventListener('click', async () => {
+            try {
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                await signInWithEmailAndPassword(auth, email, password);
+                errorMessage.textContent = '';
+            } catch (error) {
+                errorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요.";
+            }
+        });
 
+        logoutButton.addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // --- 핵심 로직: 사용자의 로그인 상태 변화 감지 ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // 사용자가 로그인한 경우
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                userEmailSpan.textContent = `환영합니다, ${user.email}`;
+                
+                // 해당 사용자의 D-Day 목록만 실시간으로 가져오기
+                listenToDdays(user.uid);
+
+            } else {
+                // 사용자가 로그아웃한 경우
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                
+                // 이전에 구독했던 실시간 리스너가 있다면 해제
+                if (unsubscribeFromDdays) {
+                    unsubscribeFromDdays();
+                }
+            }
+        });
+
+        // --- Firestore 데이터베이스 관련 함수 (CRUD) ---
+
+        function listenToDdays(userId) {
+            const ddaysCollection = collection(db, "ddays");
+            // 쿼리: 'ddays' 컬렉션에서 'userId'가 현재 로그인한 사용자의 id와 같은 문서들만 선택
+            const q = query(ddaysCollection, where("userId", "==", userId));
+
+            // 실시간 리스너 구독
+            unsubscribeFromDdays = onSnapshot(q, (snapshot) => {
+                currentDdays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderDdays();
+            });
+        }
+
+        addButton.addEventListener('click', async () => {
+            const title = titleInput.value;
+            const date = dateInput.value;
+            const user = auth.currentUser;
+
+            if (title && date && user) {
+                try {
+                    // 'ddays' 컬렉션에 새 문서 추가
+                    await addDoc(collection(db, "ddays"), {
+                        title: title,
+                        date: date,
+                        userId: user.uid, // ★★★ 문서를 생성한 사용자 ID 저장
+                        createdAt: new Date()
+                    });
+                    titleInput.value = '';
+                    dateInput.value = '';
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                }
+            }
+        });
+        
+        async function deleteDday(docId) {
+            try {
+                await deleteDoc(doc(db, "ddays", docId));
+            } catch (error) {
+                console.error("Error removing document: ", error);
+            }
+        }
+
+        function renderDdays() {
+            ddayList.innerHTML = '';
+            // 날짜순으로 정렬
+            const sortedDdays = [...currentDdays].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            sortedDdays.forEach(dday => {
+                const li = document.createElement('li');
+                li.classList.add('dday-item');
+                
+                const targetDate = new Date(dday.date);
+                const diff = targetDate - new Date();
+                const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                
+                let resultText = diff < 0 ? `D+${Math.abs(diffDays-1)}` : `D-${diffDays}`;
+                if (diffDays === 0) resultText = 'D-Day!';
+
+                li.innerHTML = `
+                    <div class="dday-info">
+                        <span class="dday-title">${dday.title} (${dday.date})</span>
+                        <span>${resultText}</span>
+                    </div>
+                    <button class="delete-button">×</button>
+                `;
+                
+                li.querySelector('.delete-button').addEventListener('click', () => deleteDday(dday.id));
+                ddayList.appendChild(li);
+            });
+        }
     </script>
 </body>
 </html>
+
+</html>
+
