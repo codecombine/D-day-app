@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱_v0.1</title>
+    <title>D-Day 앱_v0.2</title>
     <style>
         /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
@@ -192,7 +192,6 @@
         function listenToDdays(userId) {
             const q = query(collection(db, "ddays"), where("userId", "==", userId));
             unsubscribeFromDdays = onSnapshot(q, (snapshot) => {
-                // ★★★ 수정된 부분: 임시 변수가 아닌 전역 변수 'currentDdays'에 데이터를 저장합니다.
                 currentDdays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderDdays(); 
             });
@@ -215,6 +214,7 @@
             await deleteDoc(doc(db, "ddays", docId));
         }
 
+        // ★★★ 수정된 부분: XSS 방어를 위해 innerHTML과 textContent를 분리합니다.
         function renderDdays() {
             ddayList.innerHTML = '';
             const sortedDdays = [...currentDdays].sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -249,15 +249,21 @@
                 
                 const deleteButtonHTML = isEditMode ? `<button class="delete-button" data-id="${dday.id}">×</button>` : '';
 
+                // 1. 안전한 HTML 구조를 먼저 생성합니다. (사용자 입력값은 비워둡니다)
                 li.innerHTML = `
                     <div class="dday-info">
-                        <div class="dday-title">${dday.title}</div>
-                        <div class="dday-date">${dday.date}</div>
+                        <div class="dday-title"></div>
+                        <div class="dday-date"></div>
                         ${resultHTML}
                     </div>
                     ${deleteButtonHTML}
                 `;
                 
+                // 2. 사용자 입력값은 textContent를 사용해 안전하게 텍스트로 삽입합니다.
+                li.querySelector('.dday-title').textContent = dday.title;
+                li.querySelector('.dday-date').textContent = dday.date;
+                
+                // 3. 삭제 버튼이 있을 경우에만 이벤트 리스너를 추가합니다.
                 if (isEditMode) {
                     li.querySelector('.delete-button').addEventListener('click', () => deleteDday(dday.id));
                 }
