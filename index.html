@@ -207,9 +207,11 @@
         function listenToDdays(userId) {
             const q = query(collection(db, "ddays"), where("userId", "==", userId));
             unsubscribeFromDdays = onSnapshot(q, (snapshot) => {
-                const ddays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderDdays();
+                // ★★★ 수정된 부분: 임시 변수가 아닌 전역 변수 'currentDdays'에 데이터를 저장합니다.
+                currentDdays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderDdays(); 
             });
+            
         }
 
         addButton.addEventListener('click', async () => {
@@ -289,6 +291,7 @@
     </script>
 </body>
 </html>
+
 
 
 
