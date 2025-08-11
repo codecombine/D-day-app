@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱 (Firebase 로그인)</title>
+    <title>D-Day 앱</title>
     <style>
-        /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
+        /* CSS */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 40px 15px; box-sizing: border-box; }
         .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; text-align: center; }
@@ -284,13 +284,8 @@
                 ddayList.appendChild(li);
             });
         }
-        
-        // 이전 코드에서 복사해 온 부분 (이벤트 리스너)
-        signupButton.addEventListener('click', async () => { try { errorMessage.textContent = ''; const email = emailInput.value; const password = passwordInput.value; if (!email || password.length < 6) { errorMessage.textContent = "이메일을 입력하고 비밀번호는 6자리 이상으로 설정해주세요."; return; } await createUserWithEmailAndPassword(auth, email, password); } catch (error) { if (error.code === 'auth/email-already-in-use') { errorMessage.textContent = "이미 사용 중인 이메일입니다."; } else { errorMessage.textContent = "회원가입 실패: " + error.message; } } });
-        loginButton.addEventListener('click', async () => { try { errorMessage.textContent = ''; await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value); } catch (error) { errorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요."; } });
-        googleLoginButton.addEventListener('click', () => { const provider = new GoogleAuthProvider(); signInWithPopup(auth, provider) .catch((error) => { errorMessage.textContent = "구글 로그인 중 오류가 발생했습니다."; }); });
-
     </script>
 </body>
 </html>
+
 
