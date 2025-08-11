@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱</title>
+    <title>D-Day 앱_v0.1</title>
     <style>
-        /* CSS */
+        /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 40px 15px; box-sizing: border-box; }
         .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; text-align: center; }
@@ -19,28 +19,29 @@
         .auth-form button:hover { opacity: 0.9; }
         #login-button { background-color: #007bff; }
         #signup-button { background-color: #28a745; }
-        #google-login-button { background-color: #DB4437; } /* 구글 버튼 스타일 */
+        #google-login-button { background-color: #DB4437; }
         #error-message { color: red; font-size: 0.9em; min-height: 1.2em; text-align: center; }
 
         /* 메인 앱 섹션 */
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .user-info { font-size: 0.9em; color: #6c757d; }
         #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
-
-        /* ★★★ 편집/완료 버튼 스타일 추가 */
+        
         #toggle-edit-button { width: 100%; padding: 10px; margin-bottom: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #007bff; background-color: #007bff; color: white; }
         .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #007bff; }
 
-        /* ★★★ 편집 패널 스타일 */
         #edit-panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         #add-button { background-color: #28a745; }
-        
-        /* D-Day 목록 (이전과 유사) */
+
+        /* D-Day 목록 */
         #dday-list { list-style: none; padding: 0; text-align: left; }
         .dday-item { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .dday-info { flex-grow: 1; }
+        .dday-info { flex-grow: 1; text-align: left; }
         .dday-title { font-weight: bold; font-size: 1.1em; }
+        .dday-date { font-size: 0.8em; color: #6c757d; }
+        .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; }
+        .dday-elapsed { font-size: 0.9em; color: #17a2b8; margin-top: 4px; }
         .delete-button { background: none; border: none; color: #dc3545; font-size: 1.2em; cursor: pointer; }
     </style>
 </head>
@@ -69,61 +70,49 @@
             </div>
             <h1>D-Day 목록</h1>
             
-            <!-- ★★★ 편집/완료 버튼 추가 -->
             <button id="toggle-edit-button">편집</button>
 
-            <!-- ★★★ 편집 전용 패널로 구조 변경 -->
             <div id="edit-panel" class="hidden">
                 <input type="text" id="event-title" placeholder="이벤트 이름">
                 <input type="date" id="event-date">
                 <button id="add-button" class="auth-form button">추가하기</button>
             </div>
-            
+
             <ul id="dday-list"></ul>
         </div>
     </div>
 
     <!-- Firebase SDK 로드 -->
     <script type="module">
-        // Firebase 모듈을 가져옵니다.
-          import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-          import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-        // ★★★ 구글 로그인 관련 모듈 추가    
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
         // =======================================================================
-        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 1단계: 여기에 Firebase 설정 객체 붙여넣기 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
-        // =======================================================================
-        
-        
         const firebaseConfig = {
             apiKey: "AIzaSyBq6wADijXkVUOqw44Pv5BKN0xJ9BtS11Q",
-              authDomain: "d-day-app.firebaseapp.com",
-              projectId: "d-day-app",
-              storageBucket: "d-day-app.firebasestorage.app",
-              messagingSenderId: "39953405485",
-              appId: "1:39953405485:web:3e655af75dcde652ce8aa4",
-              measurementId: "G-2YY6MSFZZJ"
-            
+            authDomain: "d-day-app.firebaseapp.com",
+            projectId: "d-day-app",
+            storageBucket: "d-day-app.appspot.com",
+            messagingSenderId: "39953405485",
+            appId: "1:39953405485:web:3e655af75dcde652ce8aa4",
+            measurementId: "G-2YY6MSFZZJ"
         };
-        // =======================================================================
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
         // =======================================================================
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         // DOM 요소 가져오기
+        const container = document.querySelector('.container');
         const authSection = document.getElementById('auth-section');
         const appSection = document.getElementById('app-section');
         const emailInput = document.getElementById('email-input');
         const passwordInput = document.getElementById('password-input');
         const loginButton = document.getElementById('login-button');
         const signupButton = document.getElementById('signup-button');
-        const googleLoginButton = document.getElementById('google-login-button'); // ★★★ 구글 버튼 추가
+        const googleLoginButton = document.getElementById('google-login-button');
         const logoutButton = document.getElementById('logout-button');
         const userEmailSpan = document.getElementById('user-email');
         const errorMessage = document.getElementById('error-message');
@@ -131,60 +120,58 @@
         const dateInput = document.getElementById('event-date');
         const addButton = document.getElementById('add-button');
         const ddayList = document.getElementById('dday-list');
-        
+        const toggleEditButton = document.getElementById('toggle-edit-button'); 
+        const editPanel = document.getElementById('edit-panel'); 
+
         let unsubscribeFromDdays = null;
+        let isEditMode = false; 
+        let currentDdays = []; 
 
         // --- 인증 관련 함수 ---
-
-        signupButton.addEventListener('click', async () => {
-            try {
-                errorMessage.textContent = ''; // 이전 에러 메시지 초기화
-                const email = emailInput.value;
-                const password = passwordInput.value;
-                if (!email || password.length < 6) {
-                    errorMessage.textContent = "이메일을 입력하고 비밀번호는 6자리 이상으로 설정해주세요.";
-                    return;
-                }
-                await createUserWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage.textContent = "이미 사용 중인 이메일입니다.";
-                } else {
-                    errorMessage.textContent = "회원가입 실패: " + error.message;
-                }
-            }
+        signupButton.addEventListener('click', async () => { 
+            try { 
+                errorMessage.textContent = ''; 
+                const email = emailInput.value; 
+                const password = passwordInput.value; 
+                if (!email || password.length < 6) { 
+                    errorMessage.textContent = "이메일을 입력하고 비밀번호는 6자리 이상으로 설정해주세요."; 
+                    return; 
+                } 
+                await createUserWithEmailAndPassword(auth, email, password); 
+            } catch (error) { 
+                if (error.code === 'auth/email-already-in-use') { 
+                    errorMessage.textContent = "이미 사용 중인 이메일입니다."; 
+                } else { 
+                    errorMessage.textContent = "회원가입 실패: " + error.message; 
+                } 
+            } 
         });
-
-        loginButton.addEventListener('click', async () => {
-            try {
-                errorMessage.textContent = '';
-                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-            } catch (error) {
-                errorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요.";
-            }
+        loginButton.addEventListener('click', async () => { 
+            try { 
+                errorMessage.textContent = ''; 
+                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value); 
+            } catch (error) { 
+                errorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요."; 
+            } 
         });
-        
-        // ★★★ 구글 로그인 함수 추가
-        googleLoginButton.addEventListener('click', () => {
-            const provider = new GoogleAuthProvider();
+        googleLoginButton.addEventListener('click', () => { 
+            const provider = new GoogleAuthProvider(); 
             signInWithPopup(auth, provider)
-                .catch((error) => {
-                    errorMessage.textContent = "구글 로그인 중 오류가 발생했습니다.";
-                });
+                .catch((error) => { 
+                    errorMessage.textContent = "구글 로그인 중 오류가 발생했습니다."; 
+                }); 
         });
-
         logoutButton.addEventListener('click', () => signOut(auth));
 
-        // ★★★ 편집 모드 전환 함수
+        // 편집 모드 전환 함수
         function toggleEditMode() {
-            isEditMode = !isEditMode; // 모드 전환
+            isEditMode = !isEditMode; 
             container.classList.toggle('edit-mode', isEditMode);
             editPanel.classList.toggle('hidden', !isEditMode);
             toggleEditButton.textContent = isEditMode ? '완료' : '편집';
-            renderDdays(); // 모드가 바뀌면 목록을 다시 그려서 삭제 버튼 등을 업데이트
+            renderDdays(); 
         }
         toggleEditButton.addEventListener('click', toggleEditMode);
-
 
         // --- 핵심 로직: 사용자의 로그인 상태 변화 감지 ---
         onAuthStateChanged(auth, (user) => {
@@ -197,13 +184,11 @@
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
                 if (unsubscribeFromDdays) unsubscribeFromDdays();
-                // ★★★ 로그아웃 시 편집 모드 초기화
                 if (isEditMode) toggleEditMode(); 
             }
         });
 
         // --- Firestore 데이터베이스 관련 함수 (CRUD) ---
-
         function listenToDdays(userId) {
             const q = query(collection(db, "ddays"), where("userId", "==", userId));
             unsubscribeFromDdays = onSnapshot(q, (snapshot) => {
@@ -211,7 +196,6 @@
                 currentDdays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderDdays(); 
             });
-            
         }
 
         addButton.addEventListener('click', async () => {
@@ -231,7 +215,6 @@
             await deleteDoc(doc(db, "ddays", docId));
         }
 
-        // ★★★ renderDdays 함수 대폭 수정
         function renderDdays() {
             ddayList.innerHTML = '';
             const sortedDdays = [...currentDdays].sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -247,10 +230,7 @@
                 let resultHTML = '';
 
                 if (diff < 0) {
-                    // D-Day가 지난 경우
                     const daysPassed = Math.floor(Math.abs(diff) / (1000 * 60 * 60 * 24));
-                    
-                    // 년/월/일 계산 로직
                     let years = now.getFullYear() - targetDate.getFullYear();
                     let months = now.getMonth() - targetDate.getMonth();
                     let days = now.getDate() - targetDate.getDate();
@@ -262,13 +242,11 @@
                         <div class="dday-elapsed">${years}년 ${months}개월 ${days}일 지남</div>
                     `;
                 } else {
-                    // D-Day가 남은 경우
                     const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
                     resultHTML = `<div class="dday-result">D-${daysLeft}</div>`;
                     if (daysLeft === 0) resultHTML = `<div class="dday-result">D-Day!</div>`;
                 }
                 
-                // 편집 모드일 때만 삭제 버튼을 보여줌
                 const deleteButtonHTML = isEditMode ? `<button class="delete-button" data-id="${dday.id}">×</button>` : '';
 
                 li.innerHTML = `
@@ -280,7 +258,6 @@
                     ${deleteButtonHTML}
                 `;
                 
-                // 삭제 버튼에 이벤트 리스너 추가
                 if (isEditMode) {
                     li.querySelector('.delete-button').addEventListener('click', () => deleteDday(dday.id));
                 }
@@ -291,7 +268,3 @@
     </script>
 </body>
 </html>
-
-
-
-
