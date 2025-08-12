@@ -3,29 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱_v0.2.2</title>
+    <title>D-Day App</title>
     <style>
-        /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
+        /* CSS */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 40px 15px; box-sizing: border-box; }
-        .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; text-align: center; }
+        
+        /* ★★★ 3. 전체 바탕 색은 아주 연한 회색으로 변경 */
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #f4f6f9; /* 아주 연한 회색 */
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 40px 15px; 
+            box-sizing: border-box; 
+        }
+        .container { 
+            background-color: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 500px; 
+            text-align: center; 
+        }
         h1, h2 { color: #2c3e50; }
         .hidden { display: none !important; }
         
+        /* ★★★ 1. 맨 위 D-day app 제목 스타일 */
+        .main-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #4a90e2; /* 파스텔톤 파란색 */
+            margin-bottom: 30px;
+        }
+
         /* 인증 관련 폼 */
         .auth-form { display: flex; flex-direction: column; gap: 15px; }
         .auth-form input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
         .auth-form button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; color: white; transition: opacity 0.2s; }
         .auth-form button:hover { opacity: 0.9; }
-        #login-button { background-color: #007bff; }
+        
+        /* ★★★ 4. 로그인 버튼 색상 변경 (파스텔 톤) */
+        #login-button { background-color: #8ab4f8; }
+        #google-login-button { background-color: #a0c3ff; }
         #signup-button { background-color: #28a745; }
-        #google-login-button { background-color: #DB4437; }
+        
         .error-message, .success-message { font-size: 0.9em; min-height: 1.2em; text-align: center; }
         .error-message { color: red; }
         .success-message { color: green; }
 
-        /* 화면 전환 링크 스타일 */
-        .auth-link { background: none; border: none; color: #007bff; cursor: pointer; padding: 10px; font-size: 0.9em; }
+        /* ★★★ 2. 회원가입, 비밀번호 문구 글자색 변경 */
+        .auth-link { background: none; border: none; color: #333; cursor: pointer; padding: 10px; font-size: 0.9em; }
         .auth-link:hover { text-decoration: underline; }
 
         /* 메인 앱 섹션 */
@@ -33,8 +64,8 @@
         .user-info { font-size: 0.9em; color: #6c757d; }
         #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
         
-        #toggle-edit-button { width: 100%; padding: 10px; margin-bottom: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #007bff; background-color: #007bff; color: white; }
-        .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #007bff; }
+        #toggle-edit-button { width: 100%; padding: 10px; margin-bottom: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #8ab4f8; background-color: #8ab4f8; color: white; }
+        .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #8ab4f8; }
 
         #edit-panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
         #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
@@ -42,17 +73,28 @@
 
         #dday-list { list-style: none; padding: 0; text-align: left; }
         .dday-item { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .dday-info { flex-grow: 1; text-align: left; }
-        .dday-title { font-weight: bold; font-size: 1.1em; }
-        .dday-date { font-size: 0.8em; color: #6c757d; }
-        .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; }
-        .dday-elapsed { font-size: 0.9em; color: #17a2b8; margin-top: 4px; }
-        .delete-button { background: none; border: none; color: #dc3545; font-size: 1.2em; cursor: pointer; }
+        
+        /* ★★★ 개인정보 처리방침 뷰 스타일 */
+        #privacy-view { text-align: left; font-size: 0.9em; line-height: 1.6; }
+        #privacy-view h3 { margin-top: 20px; }
+
+        /* ★★★ Footer 스타일 */
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.8em;
+            color: #888;
+        }
+        footer p { margin: 5px 0; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- ★★★ 1. 메인 타이틀 추가 -->
+        <h1 class="main-title">D-Day App</h1>
+
         <!-- 로그인 전 표시될 화면 -->
         <div id="auth-section">
             <!-- 1. 로그인 뷰 -->
@@ -97,6 +139,21 @@
                     <button class="auth-link" data-target="login-view">로그인 화면으로 돌아가기</button>
                 </div>
             </div>
+            
+            <!-- ★★★ 개인정보 처리방침 뷰 추가 -->
+            <div id="privacy-view" class="hidden">
+                <h2>개인정보 처리방침</h2>
+                <p>D-Day App은 사용자의 개인정보를 소중하게 생각하며, 정보통신망 이용촉진 및 정보보호 등에 관한 법률을 준수하고 있습니다.</p>
+                <h3>1. 수집하는 개인정보 항목</h3>
+                <p>회사는 회원가입, 서비스 제공 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.<br>- 수집항목 : 이메일 주소</p>
+                <h3>2. 개인정보의 수집 및 이용목적</h3>
+                <p>회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.<br>- 회원 관리 : 회원제 서비스 이용에 따른 본인확인, 개인 식별<br>- 서비스 제공 : D-Day 데이터 저장 및 관리</p>
+                <h3>3. 개인정보의 보유 및 이용기간</h3>
+                <p>개인정보는 원칙적으로 개인정보의 수집 및 이용목적이 달성되면 지체 없이 파기합니다. 단, 회원 탈퇴 시 모든 정보는 즉시 삭제됩니다.</p>
+                <h3>4. 개인정보 제공</h3>
+                <p>회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.</p>
+                <button class="auth-link" data-target="login-view" style="margin-top: 20px; font-weight: bold;">로그인 화면으로 돌아가기</button>
+            </div>
         </div>
 
         <!-- 로그인 후 표시될 화면 -->
@@ -117,20 +174,42 @@
 
             <ul id="dday-list"></ul>
         </div>
+
+        <!-- ★★★ Footer 추가 -->
+        <footer>
+            <p><button class="auth-link" data-target="privacy-view">개인정보 처리방침</button></p>
+            <p>Contact: <a href="mailto:1538iron@gmail.com">1538iron@gmail.com</a></p>
+            <p>Copyright &copy; 2024 IronCPA. All Rights Reserved.</p>
+        </footer>
     </div>
 
     <!-- Firebase SDK 로드 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-        const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "...", /* ... */ };
+        // =======================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBq6wADijXkVUOqw44Pv5BKN0xJ9BtS11Q",
+            authDomain: "d-day-app.firebaseapp.com",
+            projectId: "d-day-app",
+            storageBucket: "d-day-app.appspot.com",
+            messagingSenderId: "39953405485",
+            appId: "1:39953405485:web:3e655af75dcde652ce8aa4",
+            measurementId: "G-2YY6MSFZZJ"
+        };
+        // =======================================================================
+        
+        // ... (firebaseConfig 및 나머지 JS 코드는 이전 버전과 동일합니다) ...
+        // 단, DOM 요소 가져오기 부분에서 privacy-view를 추가하고,
+        // authLinks 이벤트 리스너가 footer 안의 링크도 처리할 수 있도록 해야 합니다.
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // DOM 요소 가져오기
+        // ★★★ DOM 요소 수정
         const authSection = document.getElementById('auth-section');
         const loginView = document.getElementById('login-view');
         const signupView = document.getElementById('signup-view');
@@ -164,20 +243,20 @@
         const dateInput = document.getElementById('event-date');
         const addButton = document.getElementById('add-button');
         const ddayList = document.getElementById('dday-list');
+        
+        const privacyView = document.getElementById('privacy-view');
 
-        let unsubscribeFromDdays = null;
-        let isEditMode = false;
-        let currentDdays = [];
+        const authLinks = document.querySelectorAll('.auth-link'); // footer의 링크까지 모두 선택됨
 
-        // 인증 화면 전환 함수
+        // ★★★ 인증 화면 전환 함수 (수정 없음, privacy-view가 추가된 HTML 구조에서 그대로 작동)
         function showAuthView(viewId) {
             loginView.classList.add('hidden');
             signupView.classList.add('hidden');
             resetView.classList.add('hidden');
+            privacyView.classList.add('hidden'); // privacy-view도 숨김 처리
             document.getElementById(viewId).classList.remove('hidden');
         }
-
-        authLinks.forEach(link => {
+                authLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 showAuthView(e.target.dataset.target);
             });
@@ -363,3 +442,4 @@
     </script>
 </body>
 </html>
+
