@@ -73,8 +73,23 @@
         .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #8ab4f8; }
 
         #edit-panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        #add-button { background-color: #28a745; }
+        #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; } 
+        
+        /* ★★★ 수정된 부분: add-button의 스타일을 명확하게 정의하고 높이를 키웠습니다. */
+        #add-button {
+            background-color: #28a745;
+            padding: 16px; /* 버튼의 높이를 조절합니다. 12px가 기본값이었습니다. */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        #add-button:hover {
+            opacity: 0.9;
+        }
 
         #dday-list { list-style: none; padding: 0; text-align: left; }
         .dday-item { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -180,13 +195,13 @@
         <footer>
             <p><button class="auth-link" data-target="privacy-view">개인정보 처리방침</button></p>
             <p>Contact: <a href="mailto:1538iron@gmail.com">1538iron@gmail.com</a></p>
-            <p>Copyright &copy; 2024 IronCPA. All Rights Reserved.</p>
+            <p>Copyright &copy; 2025 IronCPA. All Rights Reserved.</p>
         </footer>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
         // =======================================================================
@@ -441,3 +456,4 @@
     </script>
 </body>
 </html>
+
