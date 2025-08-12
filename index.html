@@ -156,10 +156,16 @@
         });
         googleLoginButton.addEventListener('click', () => { 
             const provider = new GoogleAuthProvider(); 
+            // googleLoginButton 이벤트 리스너 내부
             signInWithPopup(auth, provider)
-                .catch((error) => { 
-                    errorMessage.textContent = "구글 로그인 중 오류가 발생했습니다."; 
-                }); 
+                .catch((error) => {
+                    if (error.code === 'auth/popup-closed-by-user') {
+                        // 사용자가 팝업을 그냥 닫은 경우, 굳이 에러 메시지를 보여주지 않아도 됨
+                        console.log("로그인 팝업이 사용자에 의해 닫혔습니다.");
+                    } else {
+                        errorMessage.textContent = "구글 로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+                    }
+                });
         });
         logoutButton.addEventListener('click', () => signOut(auth));
 
@@ -274,3 +280,4 @@
     </script>
 </body>
 </html>
+
