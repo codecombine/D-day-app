@@ -113,10 +113,10 @@
         .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; }
         .dday-elapsed { font-size: 0.9em; color: #17a2b8; margin-top: 4px; }
         .delete-button { background: none; border: none; color: #dc3545; font-size: 1.2em; cursor: pointer; }
-        
+        /*
         #privacy-view { text-align: left; font-size: 0.9em; line-height: 1.6; }
         #privacy-view h3 { margin-top: 20px; }
-
+        */
         footer {
             margin-top: 40px;
             padding-top: 20px;
@@ -245,7 +245,8 @@
         const loginView = document.getElementById('login-view');
         const signupView = document.getElementById('signup-view');
         const resetView = document.getElementById('reset-view');
-        const privacyView = document.getElementById('privacy-view');
+        
+        // const privacyView = document.getElementById('privacy-view');
 
         const loginEmailInput = document.getElementById('login-email-input');
         const loginPasswordInput = document.getElementById('login-password-input');
@@ -285,7 +286,7 @@
             loginView.classList.add('hidden');
             signupView.classList.add('hidden');
             resetView.classList.add('hidden');
-            privacyView.classList.add('hidden');
+            // privacyView.classList.add('hidden');
             document.getElementById(viewId).classList.remove('hidden');
         }
 
@@ -476,6 +477,7 @@
     </script>
 </body>
 </html>
+
 
 
 
