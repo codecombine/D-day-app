@@ -221,6 +221,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
@@ -239,6 +240,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const analytics = getAnalytics(app);
 
         // DOM 요소 가져오기
         const authSection = document.getElementById('auth-section');
@@ -309,6 +311,7 @@
                     return; 
                 } 
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
+                logEvent(analytics, 'sign_up', { method: 'email' }); // 'sign_up'이라는 이름의 이벤트 기록
                 
                 await sendEmailVerification(userCredential.user);
                 signupSuccessMessage.textContent = "회원가입 성공! 입력하신 이메일로 인증 링크를 보냈습니다. 확인 후 로그인해주세요.";
@@ -331,6 +334,10 @@
                 if (!userCredential.user.emailVerified) {
                     await signOut(auth);
                     loginErrorMessage.textContent = "이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.";
+
+                 else {
+                    // ★★★ 이메일 인증까지 완료된 진짜 로그인 성공 시점
+                    logEvent(analytics, 'login', { method: 'email' });
                 }
             } catch (error) { 
                 loginErrorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요."; 
@@ -340,6 +347,10 @@
         googleLoginButton.addEventListener('click', () => {
             const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider)
+                .then((result) => {
+                    // ★★★ 구글 팝업 로그인이 성공한 시점
+                    logEvent(analytics, 'login', { method: 'google' });
+                })
                 .catch((error) => {
                     loginErrorMessage.textContent = "구글 로그인 중 오류가 발생했습니다.";
                 });
@@ -412,6 +423,7 @@
                 await addDoc(collection(db, "ddays"), {
                     title: title, date: date, userId: user.uid, createdAt: new Date()
                 });
+                logEvent(analytics, 'add_dday'); // 'add_dday' 이벤트 기록
                 titleInput.value = '';
                 dateInput.value = '';
             }
