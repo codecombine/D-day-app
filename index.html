@@ -65,6 +65,20 @@
         .auth-link { background: none; border: none; color: #333; cursor: pointer; padding: 10px; font-size: 0.9em; }
         .auth-link:hover { text-decoration: underline; }
 
+        /* 기존 .auth-link 스타일과 동일하게 만듭니다. */
+        .footer-link {
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 0.9em;
+            text-decoration: none; /* 링크의 밑줄을 없애 버튼처럼 보이게 함 */
+        }
+        .footer-link:hover {
+            text-decoration: underline; /* 마우스를 올리면 밑줄 표시 */
+        }
+
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .user-info { font-size: 0.9em; color: #6c757d; }
         #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
@@ -194,10 +208,11 @@
             <ul id="dday-list"></ul>
         </div>
 
+
         <footer>
             <p>
-                <a href="./privacy_v1.0.0.html" target="_blank" class="auth-link">개인정보 처리방침</a> | 
-                <a href="./Terms_v1.0.0.html" target="_blank" class="auth-link">서비스 이용약관</a>
+                <a href="./privacy_v1.0.0.html" target="_blank" class="footer-link">개인정보 처리방침</a> | 
+                <a href="./Terms_v1.0.0.html" target="_blank" class="footer-link">서비스 이용약관</a>
             </p>
             <p>Contact: <a href="mailto:1538iron@gmail.com">1538iron@gmail.com</a></p>
             <p>Copyright &copy; 2025 IronCPA. All Rights Reserved.</p>
@@ -461,6 +476,7 @@
     </script>
 </body>
 </html>
+
 
 
 
