@@ -3,66 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Day 앱_v0.1</title>
+    <title>D-Day App</title>
     <style>
-        /* CSS: 이전과 유사하지만 로그인/앱 섹션 전환 스타일 추가 */
+        /* CSS */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; margin: 0; padding: 40px 15px; box-sizing: border-box; }
-        .container { background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); width: 100%; max-width: 500px; text-align: center; }
+        
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: #f4f6f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 40px 15px; 
+            box-sizing: border-box; 
+        }
+        .container { 
+            background-color: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 500px; 
+            text-align: center; 
+        }
         h1, h2 { color: #2c3e50; }
         .hidden { display: none !important; }
         
-        /* 로그인/회원가입 폼 */
+        .main-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #0B3040; 
+            margin-bottom: 30px;
+        }
+
         .auth-form { display: flex; flex-direction: column; gap: 15px; }
         .auth-form input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .auth-form button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; color: white; transition: opacity 0.2s; }
-        .auth-form button:hover { opacity: 0.9; }
-        #login-button { background-color: #007bff; }
+        /* ★★★ 수정된 부분: .auth-link 클래스를 갖지 않는 버튼에만 적용되도록 변경 */
+        .auth-form button:not(.auth-link) { 
+            padding: 12px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 16px; 
+            color: white; 
+            transition: opacity 0.2s; 
+        }
+        .auth-form button:not(.auth-link):hover { opacity: 0.9; }
+        
+        #login-button { background-color: #0B3040; }
+        #google-login-button { background-color: #104861; }
         #signup-button { background-color: #28a745; }
-        #google-login-button { background-color: #DB4437; }
-        #error-message { color: red; font-size: 0.9em; min-height: 1.2em; text-align: center; }
+        #reset-password-button { background-color: #ffc107; }
+        
+        .error-message, .success-message { font-size: 0.9em; min-height: 1.2em; text-align: center; }
+        .error-message { color: red; }
+        .success-message { color: green; }
 
-        /* 메인 앱 섹션 */
+        .auth-link { background: none; border: none; color: #333; cursor: pointer; padding: 10px; font-size: 0.9em; }
+        .auth-link:hover { text-decoration: underline; }
+
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .user-info { font-size: 0.9em; color: #6c757d; }
         #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
         
-        #toggle-edit-button { width: 100%; padding: 10px; margin-bottom: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #007bff; background-color: #007bff; color: white; }
-        .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #007bff; }
+        #toggle-edit-button { width: 100%; padding: 10px; margin-bottom: 20px; font-weight: bold; cursor: pointer; border-radius: 8px; border: 1px solid #8ab4f8; background-color: #8ab4f8; color: white; }
+        .container.edit-mode #toggle-edit-button { background-color: #f8f9fa; color: #8ab4f8; }
 
         #edit-panel { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        #add-button { background-color: #28a745; }
+        #edit-panel input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; } 
+        
+        /* ★★★ 수정된 부분: add-button의 스타일을 명확하게 정의하고 높이를 키웠습니다. */
+        #add-button {
+            background-color: #28a745;
+            padding: 16px; /* 버튼의 높이를 조절합니다. 12px가 기본값이었습니다. */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+        #add-button:hover {
+            opacity: 0.9;
+        }
 
-        /* D-Day 목록 */
         #dday-list { list-style: none; padding: 0; text-align: left; }
         .dday-item { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .dday-info { flex-grow: 1; text-align: left; }
-        .dday-title { font-weight: bold; font-size: 1.1em; }
+        .dday-title { font-weight: bold; font-size: 1.1em; color: #343a40; }
         .dday-date { font-size: 0.8em; color: #6c757d; }
         .dday-result { font-size: 1.2em; font-weight: bold; color: #dc3545; margin-top: 5px; }
         .dday-elapsed { font-size: 0.9em; color: #17a2b8; margin-top: 4px; }
         .delete-button { background: none; border: none; color: #dc3545; font-size: 1.2em; cursor: pointer; }
+        
+        #privacy-view { text-align: left; font-size: 0.9em; line-height: 1.6; }
+        #privacy-view h3 { margin-top: 20px; }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.8em;
+            color: #888;
+        }
+        footer p { margin: 5px 0; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 로그인 전 표시될 화면 -->
+        <h1 class="main-title">D-Day App</h1>
+
         <div id="auth-section">
-            <h2>로그인 / 회원가입</h2>
-            <div class="auth-form">
-                <input type="email" id="email-input" placeholder="이메일">
-                <input type="password" id="password-input" placeholder="비밀번호 (6자리 이상)">
-                <p id="error-message"></p>
-                <button id="login-button">이메일로 로그인</button>
-                <button id="signup-button">이메일로 회원가입</button>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 10px 0;">
-                <button id="google-login-button">구글 계정으로 로그인</button>
+            <div id="login-view">
+                <h2>로그인</h2>
+                <div class="auth-form">
+                    <input type="email" id="login-email-input" placeholder="이메일">
+                    <input type="password" id="login-password-input" placeholder="비밀번호">
+                    <p id="login-error-message" class="error-message"></p>
+                    <button id="login-button">로그인</button>
+                    <button id="google-login-button">구글 계정으로 로그인</button>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 5px 0;">
+                    <button class="auth-link" data-target="signup-view">계정이 없으신가요? 회원가입</button>
+                    <button class="auth-link" data-target="reset-view">비밀번호를 잊으셨나요?</button>
+                </div>
+            </div>
+
+            <div id="signup-view" class="hidden">
+                <h2>회원가입</h2>
+                <div class="auth-form">
+                    <input type="email" id="signup-email-input" placeholder="이메일">
+                    <input type="password" id="signup-password-input" placeholder="비밀번호 (6자리 이상)">
+                    <p id="signup-error-message" class="error-message"></p>
+                    <p id="signup-success-message" class="success-message"></p>
+                    <button id="signup-button">이메일로 회원가입</button>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 5px 0;">
+                    <button class="auth-link" data-target="login-view">이미 계정이 있으신가요? 로그인</button>
+                </div>
+            </div>
+
+            <div id="reset-view" class="hidden">
+                <h2>비밀번호 재설정</h2>
+                <div class="auth-form">
+                    <p>가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다.</p>
+                    <input type="email" id="reset-email-input" placeholder="이메일">
+                    <p id="reset-error-message" class="error-message"></p>
+                    <p id="reset-success-message" class="success-message"></p>
+                    <button id="reset-password-button">재설정 링크 발송</button>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 5px 0;">
+                    <button class="auth-link" data-target="login-view">로그인 화면으로 돌아가기</button>
+                </div>
+            </div>
+            
+            <div id="privacy-view" class="hidden">
+                <h2>개인정보 처리방침</h2>
+                <p>D-Day App은 사용자의 개인정보를 소중하게 생각하며, 정보통신망 이용촉진 및 정보보호 등에 관한 법률을 준수하고 있습니다.</p>
+                <h3>1. 수집하는 개인정보 항목</h3>
+                <p>회사는 회원가입, 서비스 제공 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.<br>- 수집항목 : 이메일 주소</p>
+                <h3>2. 개인정보의 수집 및 이용목적</h3>
+                <p>회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.<br>- 회원 관리 : 회원제 서비스 이용에 따른 본인확인, 개인 식별<br>- 서비스 제공 : D-Day 데이터 저장 및 관리</p>
+                <h3>3. 개인정보의 보유 및 이용기간</h3>
+                <p>개인정보는 원칙적으로 개인정보의 수집 및 이용목적이 달성되면 지체 없이 파기합니다. 단, 회원 탈퇴 시 모든 정보는 즉시 삭제됩니다.</p>
+                <h3>4. 개인정보 제공</h3>
+                <p>회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.</p>
+                <button class="auth-link" data-target="login-view" style="margin-top: 20px; font-weight: bold;">로그인 화면으로 돌아가기</button>
             </div>
         </div>
 
-        <!-- 로그인 후 표시될 화면 -->
         <div id="app-section" class="hidden">
             <div class="app-header">
                 <span class="user-info" id="user-email"></span>
@@ -80,9 +191,14 @@
 
             <ul id="dday-list"></ul>
         </div>
+
+        <footer>
+            <p><button class="auth-link" data-target="privacy-view">개인정보 처리방침</button></p>
+            <p>Contact: <a href="mailto:1538iron@gmail.com">1538iron@gmail.com</a></p>
+            <p>Copyright &copy; 2025 IronCPA. All Rights Reserved.</p>
+        </footer>
     </div>
 
-    <!-- Firebase SDK 로드 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
@@ -105,77 +221,140 @@
         const db = getFirestore(app);
 
         // DOM 요소 가져오기
-        const container = document.querySelector('.container');
         const authSection = document.getElementById('auth-section');
-        const appSection = document.getElementById('app-section');
-        const emailInput = document.getElementById('email-input');
-        const passwordInput = document.getElementById('password-input');
+        const loginView = document.getElementById('login-view');
+        const signupView = document.getElementById('signup-view');
+        const resetView = document.getElementById('reset-view');
+        const privacyView = document.getElementById('privacy-view');
+
+        const loginEmailInput = document.getElementById('login-email-input');
+        const loginPasswordInput = document.getElementById('login-password-input');
         const loginButton = document.getElementById('login-button');
+        const loginErrorMessage = document.getElementById('login-error-message');
+        
+        const signupEmailInput = document.getElementById('signup-email-input');
+        const signupPasswordInput = document.getElementById('signup-password-input');
         const signupButton = document.getElementById('signup-button');
+        const signupErrorMessage = document.getElementById('signup-error-message');
+        const signupSuccessMessage = document.getElementById('signup-success-message');
+
+        const resetEmailInput = document.getElementById('reset-email-input');
+        const resetPasswordButton = document.getElementById('reset-password-button');
+        const resetErrorMessage = document.getElementById('reset-error-message');
+        const resetSuccessMessage = document.getElementById('reset-success-message');
+        
         const googleLoginButton = document.getElementById('google-login-button');
-        const logoutButton = document.getElementById('logout-button');
+        const authLinks = document.querySelectorAll('.auth-link');
+        
+        const appSection = document.getElementById('app-section');
         const userEmailSpan = document.getElementById('user-email');
-        const errorMessage = document.getElementById('error-message');
+        const logoutButton = document.getElementById('logout-button');
+        const toggleEditButton = document.getElementById('toggle-edit-button');
+        const editPanel = document.getElementById('edit-panel');
         const titleInput = document.getElementById('event-title');
         const dateInput = document.getElementById('event-date');
         const addButton = document.getElementById('add-button');
         const ddayList = document.getElementById('dday-list');
-        const toggleEditButton = document.getElementById('toggle-edit-button'); 
-        const editPanel = document.getElementById('edit-panel'); 
 
         let unsubscribeFromDdays = null;
-        let isEditMode = false; 
-        let currentDdays = []; 
+        let isEditMode = false;
+        let currentDdays = [];
+
+        // 인증 화면 전환 함수
+        function showAuthView(viewId) {
+            loginView.classList.add('hidden');
+            signupView.classList.add('hidden');
+            resetView.classList.add('hidden');
+            privacyView.classList.add('hidden');
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        authLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                showAuthView(e.target.dataset.target);
+            });
+        });
 
         // --- 인증 관련 함수 ---
+        
         signupButton.addEventListener('click', async () => { 
+            signupErrorMessage.textContent = '';
+            signupSuccessMessage.textContent = '';
             try { 
-                errorMessage.textContent = ''; 
-                const email = emailInput.value; 
-                const password = passwordInput.value; 
+                const email = signupEmailInput.value; 
+                const password = signupPasswordInput.value; 
                 if (!email || password.length < 6) { 
-                    errorMessage.textContent = "이메일을 입력하고 비밀번호는 6자리 이상으로 설정해주세요."; 
+                    signupErrorMessage.textContent = "이메일을 입력하고 비밀번호는 6자리 이상으로 설정해주세요."; 
                     return; 
                 } 
-                await createUserWithEmailAndPassword(auth, email, password); 
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password); 
+                
+                await sendEmailVerification(userCredential.user);
+                signupSuccessMessage.textContent = "회원가입 성공! 입력하신 이메일로 인증 링크를 보냈습니다. 확인 후 로그인해주세요.";
+                
+                await signOut(auth);
+
             } catch (error) { 
                 if (error.code === 'auth/email-already-in-use') { 
-                    errorMessage.textContent = "이미 사용 중인 이메일입니다."; 
+                    signupErrorMessage.textContent = "이미 사용 중인 이메일입니다."; 
                 } else { 
-                    errorMessage.textContent = "회원가입 실패: " + error.message; 
+                    signupErrorMessage.textContent = "회원가입 실패: " + error.message; 
                 } 
             } 
         });
+
         loginButton.addEventListener('click', async () => { 
+            loginErrorMessage.textContent = '';
             try { 
-                errorMessage.textContent = ''; 
-                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value); 
+                const userCredential = await signInWithEmailAndPassword(auth, loginEmailInput.value, loginPasswordInput.value); 
+                if (!userCredential.user.emailVerified) {
+                    await signOut(auth);
+                    loginErrorMessage.textContent = "이메일 인증이 완료되지 않았습니다. 메일함을 확인해주세요.";
+                }
             } catch (error) { 
-                errorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요."; 
+                loginErrorMessage.textContent = "로그인 실패: 이메일 또는 비밀번호를 확인하세요."; 
             } 
         });
-        googleLoginButton.addEventListener('click', () => { 
-            const provider = new GoogleAuthProvider(); 
+
+        googleLoginButton.addEventListener('click', () => {
+            const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider)
-                .catch((error) => { 
-                    errorMessage.textContent = "구글 로그인 중 오류가 발생했습니다."; 
-                }); 
+                .catch((error) => {
+                    loginErrorMessage.textContent = "구글 로그인 중 오류가 발생했습니다.";
+                });
         });
+        
+        resetPasswordButton.addEventListener('click', async () => {
+            resetErrorMessage.textContent = '';
+            resetSuccessMessage.textContent = '';
+            const email = resetEmailInput.value;
+            if (!email) {
+                resetErrorMessage.textContent = "이메일 주소를 입력해주세요.";
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                resetSuccessMessage.textContent = "입력하신 이메일로 재설정 링크를 보냈습니다. 메일함을 확인해주세요.";
+            } catch (error) {
+                resetErrorMessage.textContent = "오류가 발생했습니다. 이메일 주소를 확인해주세요.";
+            }
+        });
+
         logoutButton.addEventListener('click', () => signOut(auth));
 
-        // 편집 모드 전환 함수
         function toggleEditMode() {
-            isEditMode = !isEditMode; 
-            container.classList.toggle('edit-mode', isEditMode);
+            isEditMode = !isEditMode;
+            document.querySelector('.container').classList.toggle('edit-mode', isEditMode);
             editPanel.classList.toggle('hidden', !isEditMode);
             toggleEditButton.textContent = isEditMode ? '완료' : '편집';
-            renderDdays(); 
+            renderDdays();
         }
         toggleEditButton.addEventListener('click', toggleEditMode);
 
         // --- 핵심 로직: 사용자의 로그인 상태 변화 감지 ---
         onAuthStateChanged(auth, (user) => {
-            if (user) {
+            // 구글 로그인은 emailVerified 속성이 없으므로, 구글 제공자인 경우를 함께 확인
+            if (user && (user.emailVerified || user.providerData.some(p => p.providerId === 'google.com'))) {
                 authSection.classList.add('hidden');
                 appSection.classList.remove('hidden');
                 userEmailSpan.textContent = `환영합니다, ${user.displayName || user.email}`;
@@ -183,8 +362,15 @@
             } else {
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
-                if (unsubscribeFromDdays) unsubscribeFromDdays();
-                if (isEditMode) toggleEditMode(); 
+                if (unsubscribeFromDdays) {
+                    unsubscribeFromDdays();
+                }
+                if (isEditMode) {
+                    isEditMode = false;
+                    document.querySelector('.container').classList.remove('edit-mode');
+                    editPanel.classList.add('hidden');
+                    toggleEditButton.textContent = '편집';
+                }
             }
         });
 
@@ -192,9 +378,8 @@
         function listenToDdays(userId) {
             const q = query(collection(db, "ddays"), where("userId", "==", userId));
             unsubscribeFromDdays = onSnapshot(q, (snapshot) => {
-                // ★★★ 수정된 부분: 임시 변수가 아닌 전역 변수 'currentDdays'에 데이터를 저장합니다.
                 currentDdays = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderDdays(); 
+                renderDdays();
             });
         }
 
@@ -251,12 +436,15 @@
 
                 li.innerHTML = `
                     <div class="dday-info">
-                        <div class="dday-title">${dday.title}</div>
-                        <div class="dday-date">${dday.date}</div>
+                        <div class="dday-title"></div>
+                        <div class="dday-date"></div>
                         ${resultHTML}
                     </div>
                     ${deleteButtonHTML}
                 `;
+                
+                li.querySelector('.dday-title').textContent = dday.title;
+                li.querySelector('.dday-date').textContent = dday.date;
                 
                 if (isEditMode) {
                     li.querySelector('.delete-button').addEventListener('click', () => deleteDday(dday.id));
