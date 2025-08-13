@@ -65,6 +65,20 @@
         .auth-link { background: none; border: none; color: #333; cursor: pointer; padding: 10px; font-size: 0.9em; }
         .auth-link:hover { text-decoration: underline; }
 
+        /* 기존 .auth-link 스타일과 동일하게 만듭니다. */
+        .footer-link {
+            background: none;
+            border: none;
+            color: #333;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 0.9em;
+            text-decoration: none; /* 링크의 밑줄을 없애 버튼처럼 보이게 함 */
+        }
+        .footer-link:hover {
+            text-decoration: underline; /* 마우스를 올리면 밑줄 표시 */
+        }
+
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .user-info { font-size: 0.9em; color: #6c757d; }
         #logout-button { background-color: #dc3545; color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; }
@@ -158,7 +172,7 @@
                     <button class="auth-link" data-target="login-view">로그인 화면으로 돌아가기</button>
                 </div>
             </div>
-            
+            <!-- 이 안에 있는 내용은 주석입니다. 
             <div id="privacy-view" class="hidden">
                 <h2>개인정보 처리방침</h2>
                 <p>D-Day App은 사용자의 개인정보를 소중하게 생각하며, 정보통신망 이용촉진 및 정보보호 등에 관한 법률을 준수하고 있습니다.</p>
@@ -172,6 +186,8 @@
                 <p>회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다.</p>
                 <button class="auth-link" data-target="login-view" style="margin-top: 20px; font-weight: bold;">로그인 화면으로 돌아가기</button>
             </div>
+            -->
+            
         </div>
 
         <div id="app-section" class="hidden">
@@ -192,8 +208,12 @@
             <ul id="dday-list"></ul>
         </div>
 
+
         <footer>
-            <p><button class="auth-link" data-target="privacy-view">개인정보 처리방침</button></p>
+            <p>
+                <a href="./privacy_v1.0.0.html" target="_blank" class="footer-link">개인정보 처리방침</a> | 
+                <a href="./Terms_v1.0.0.html" target="_blank" class="footer-link">서비스 이용약관</a>
+            </p>
             <p>Contact: <a href="mailto:1538iron@gmail.com">1538iron@gmail.com</a></p>
             <p>Copyright &copy; 2025 IronCPA. All Rights Reserved.</p>
         </footer>
@@ -456,4 +476,7 @@
     </script>
 </body>
 </html>
+
+
+
 
